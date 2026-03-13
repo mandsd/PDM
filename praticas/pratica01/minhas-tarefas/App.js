@@ -1,11 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button } from 'react-native';
+import { titulo } from './util';
+import titulo_default from './util';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Aula de PDM!</Text>
+      <Text>{titulo}</Text>
+      <Text>{titulo_default}</Text>
       <StatusBar style="auto" />
+      <Button title="Clique aqui"/>
     </View>
   );
 }
