@@ -1,20 +1,17 @@
-/**
- * URL base da API.
- *
- * - No emulador Android, "localhost" do app aponta para o próprio emulador,
- *   por isso usamos 10.0.2.2 (IP especial que o Android mapeia para o
- *   localhost da máquina hospedeira).
- * - Em device físico, troque para o IP da sua máquina na rede local
- *   (ex.: http://192.168.0.10:3000) — descubra com `ipconfig` no Windows.
- * - Para iOS Simulator, "http://localhost:3000" funciona normalmente.
- *
- * Você pode sobrescrever via variável de ambiente do Expo (EXPO_PUBLIC_API_URL).
- */
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:3000";
+
+let _token = null;
+
+export function setAuthToken(token) {
+  _token = token;
+}
 
 async function request(path, options = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+    },
     ...options,
   });
 
@@ -27,6 +24,9 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  login: (email, password) =>
+    request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+
   listCategories:    ()        => request("/categories"),
   createCategory:    (data)    => request("/categories",        { method: "POST",   body: JSON.stringify(data) }),
   updateCategory:    (id, d)   => request(`/categories/${id}`,  { method: "PUT",    body: JSON.stringify(d) }),

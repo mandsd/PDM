@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "Gestão Financeira API",
+    "_postman_id": "gestao-financeira-api-collection",
+    "description": "Collection completa da API gestao-financeira-api.\n\nFluxo recomendado:\n1. Execute 'Login' e copie o token retornado.\n2. Adicione o token na variável de ambiente `token`.\n3. Execute os demais endpoints na ordem listada.\n\nUsuário padrão criado pelo seed:\n  email: admin@gestao.com\n  senha: 123456",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "token",   "value": "",                      "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Health-check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/", "host": ["{{baseUrl}}"], "path": [""] }
+      },
+      "_description": "Resposta esperada: { \"ok\": true, \"name\": \"gestao-financeira-api\" }"
+    },
+    {
+      "name": "2. Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@gestao.com\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+      },
+      "_description": "Retorna { token, user }. Copie o token e salve na variável de ambiente `token`."
+    },
+    {
+      "name": "3. Listar categorias",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+      },
+      "_description": "Retorna as 5 categorias do seed. Copie o id da categoria 'income' para usar na criação de transação."
+    },
+    {
+      "name": "4. Criar categoria",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"health\",\n  \"displayName\": \"Saúde\",\n  \"icon\": \"favorite\",\n  \"background\": \"#FFB6B6\",\n  \"isIncome\": false\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+      },
+      "_description": "Resposta esperada: 201 Created com o objeto criado (incluindo o id gerado)."
+    },
+    {
+      "name": "5. Atualizar categoria",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"displayName\": \"Saúde e Bem-estar\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", ":id"],
+          "variable": [{ "key": "id", "value": "COLE_O_ID_DA_CATEGORIA_AQUI" }]
+        }
+      },
+      "_description": "Substitua :id pelo id retornado na criação. Atualiza apenas os campos enviados (PATCH semântico via PUT)."
+    },
+    {
+      "name": "6. Excluir categoria",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/categories/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", ":id"],
+          "variable": [{ "key": "id", "value": "COLE_O_ID_DA_CATEGORIA_AQUI" }]
+        }
+      },
+      "_description": "204 No Content em sucesso. Tente excluir uma categoria padrão (income) para confirmar o 400."
+    },
+    {
+      "name": "6b. Excluir categoria padrão (deve retornar 400)",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/categories/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", ":id"],
+          "variable": [{ "key": "id", "value": "COLE_O_ID_DA_CATEGORIA_INCOME_AQUI" }]
+        }
+      },
+      "_description": "Esperado: 400 { error: 'Categorias padrão não podem ser excluídas' }"
+    },
+    {
+      "name": "7. Criar transação",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Salário de outubro\",\n  \"value\": 3500.50,\n  \"date\": \"2026-04-29\",\n  \"categoryId\": \"COLE_O_ID_DA_CATEGORIA_INCOME_AQUI\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+      },
+      "_description": "Resposta esperada: 201 Created com o objeto da transação e a categoria aninhada."
+    },
+    {
+      "name": "8. Listar transações",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+      },
+      "_description": "Retorna todas as transações com a categoria expandida, ordenadas por data desc."
+    },
+    {
+      "name": "9. Excluir transação",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/transactions/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["transactions", ":id"],
+          "variable": [{ "key": "id", "value": "COLE_O_ID_DA_TRANSACAO_AQUI" }]
+        }
+      },
+      "_description": "Resposta esperada: 204 No Content."
+    },
+    {
+      "name": "10. Validar erros (body inválido)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+      },
+      "_description": "Esperado: 400 { error: 'Dados inválidos', details: [...] } — validação Zod."
+    }
+  ]
+}

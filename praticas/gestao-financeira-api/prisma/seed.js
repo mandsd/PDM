@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -18,7 +19,15 @@ async function main() {
       create: c,
     });
   }
-  console.log("Seed concluído.");
+
+  const hash = await bcrypt.hash("123456", 10);
+  await prisma.user.upsert({
+    where: { email: "admin@gestao.com" },
+    update: {},
+    create: { name: "Amanda", email: "admin@gestao.com", password: hash },
+  });
+
+  console.log("Seed concluído. Usuário padrão: admin@gestao.com / 123456");
 }
 
 main()
